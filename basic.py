@@ -2,7 +2,16 @@ from config import config
 from imutils import paths
 import os
 import utils.create_models
+import utils.setup_dataset
 from keras.preprocessing.image import ImageDataGenerator
+
+################################
+# SETTING UP DATASET
+###############################
+ 
+shouldSetup = True
+if (shouldSetup): 
+    utils.setup_dataset.setup()
 
 batch_size = 32
 
