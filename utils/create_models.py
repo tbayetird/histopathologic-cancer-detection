@@ -18,7 +18,8 @@ def create_mlp(shape, regress=False):
 
 	# check to see if the regression node should be added
 	if regress:
-		model.add(Dense(1, activation="linear"))
+		model.add(Flatten())
+		model.add(Dense(1, activation="sigmoid"))
 
 	# return our model
 	return model

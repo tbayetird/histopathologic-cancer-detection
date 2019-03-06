@@ -3,6 +3,7 @@ from imutils import paths
 import os
 import utils.create_models
 import utils.setup_dataset
+from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
 
 ################################
@@ -13,7 +14,7 @@ shouldSetup = False
 if (shouldSetup):
     utils.setup_dataset.setup()
 
-batch_size = 32
+batch_size = 16
 
 # Set the image size.
 img_height = 96
@@ -23,7 +24,7 @@ img_width = 96
 # LOADING MODEL
 ###############################
 
-model = utils.create_models.create_mlp((img_width,img_height,3))
+model = utils.create_models.create_mlp((img_width,img_height,3),True)
 model.summary()
 
 ################################
@@ -43,7 +44,7 @@ test_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean())
 
 train_generator = train_datagen.flow_from_directory(
     config.TRAIN_PATH,
-    class_mode="categorical",
+    class_mode="binary",
     target_size=(img_width, img_height),
     color_mode="rgb",
     shuffle=True,
@@ -53,7 +54,7 @@ print(config.TRAIN_PATH)
 
 valid_generator = test_datagen.flow_from_directory(
     config.VAL_PATH,
-    class_mode="categorical",
+    class_mode="binary",
     target_size=(img_width, img_height),
     color_mode="rgb",
     shuffle=False,
@@ -64,7 +65,16 @@ valid_generator = test_datagen.flow_from_directory(
 # TRAINING MODEL
 ###############################
 
+model.compile(loss='binary_crossentropy',
+            optimizer=optimizers.RMSprop(lr=1e-5),
+            metrics=['acc'])
 
+history = model.fit_generator(
+        train_generator,
+        steps_per_epoch=3,
+        epochs=10,
+        validation_data=valid_generator,
+        validation_steps=3)
 
 
 ################################
