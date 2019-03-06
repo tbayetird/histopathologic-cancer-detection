@@ -2,7 +2,16 @@ from config import config
 from imutils import paths
 import os
 import utils.create_models
+import utils.setup_dataset
 from keras.preprocessing.image import ImageDataGenerator
+
+################################
+# SETTING UP DATASET
+###############################
+
+shouldSetup = False
+if (shouldSetup):
+    utils.setup_dataset.setup()
 
 batch_size = 32
 
@@ -41,14 +50,14 @@ train_generator = train_datagen.flow_from_directory(
     batch_size=batch_size)
 
 print(config.TRAIN_PATH)
-#
-# valid_generator = test_datagen.flow_from_directory(
-#     config.VAL_PATH,
-#     class_mode="categorical",
-#     target_size=(img_width, img_height),
-#     color_mode="rgb",
-#     shuffle=False,
-#     batch_size=batch_size)
+
+valid_generator = test_datagen.flow_from_directory(
+    config.VAL_PATH,
+    class_mode="categorical",
+    target_size=(img_width, img_height),
+    color_mode="rgb",
+    shuffle=False,
+    batch_size=batch_size)
 
 
 ################################
