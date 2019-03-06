@@ -26,7 +26,7 @@ for (dType, dataset, baseOutput) in trainDatasets:
     if not os.path.exists(baseOutput):
         print("[INFO] 'creating {}' directory".format(baseOutput))
         os.makedirs(baseOutput)
-    
+
     for (index, row) in dataset.iterrows():
         label = row['label']
         filename = row['id'] + ".tif"
@@ -39,7 +39,7 @@ for (dType, dataset, baseOutput) in trainDatasets:
         originalFilePath = os.path.sep.join([config.ORIG_INPUT_TRAINING_DATASET, filename])
         filePath = os.path.sep.join([labelPath, filename])
         shutil.move(originalFilePath, filePath)
-        
+
     print("[INFO] done building '{}' split".format(dType))
 
 print("[INFO] all done, good to go")

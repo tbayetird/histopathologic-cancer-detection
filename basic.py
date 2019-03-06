@@ -40,13 +40,15 @@ train_generator = train_datagen.flow_from_directory(
     shuffle=True,
     batch_size=batch_size)
 
-valid_generator = test_datagen.flow_from_directory(
-    config.VAL_PATH,
-    class_mode="categorical",
-    target_size=(img_width, img_height),
-    color_mode="rgb",
-    shuffle=False,
-    batch_size=batch_size)
+print(config.TRAIN_PATH)
+#
+# valid_generator = test_datagen.flow_from_directory(
+#     config.VAL_PATH,
+#     class_mode="categorical",
+#     target_size=(img_width, img_height),
+#     color_mode="rgb",
+#     shuffle=False,
+#     batch_size=batch_size)
 
 
 ################################
