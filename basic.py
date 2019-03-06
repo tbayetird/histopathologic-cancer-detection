@@ -1,8 +1,16 @@
 import os
-
+import keras
+import pandas as pd
+import numpy as np
 import utils.create_models
-local_dir = os.path.abspath('.')
-mock_data_dir = os.path.join(local_dir,'mock_data')
+from glob import glob
+
+from keras.preprocessing.image import load_img, img_to_array
+
+
+file_loc = os.path.realpath(__file__)
+local_dir = os.path.dirname(file_loc)
+mock_data_dir = os.path.join(local_dir,'mock-data')
 model_path='' # no model to load yet
 
 # Set the image size.
@@ -13,16 +21,12 @@ img_width = 96
 # LOADING MODEL
 ###############################
 
-
 model = utils.create_models.create_mlp((96,96,3))
 model.summary()
 
 ################################
-# PREPROCESSING DATAS
+# LOADING AND PREPROCESSING THE DATA
 ###############################
-
-
-#Nothing yet
 
 
 ################################
@@ -30,7 +34,6 @@ model.summary()
 ###############################
 
 
-#Nothing yet
 
 
 ################################
