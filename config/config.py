@@ -1,6 +1,7 @@
 import os
 
-DATASET_FOLDER = "mock-data"
+ROOT_FOLDER=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+DATASET_FOLDER = os.path.join(ROOT_FOLDER,"mock-data")
 ORIG_INPUT_TRAINING_DATASET = DATASET_FOLDER + "/train"
 ORIG_INPUT_TESTING_DATASET = DATASET_FOLDER + "/test"
 BASE_PATH = DATASET_FOLDER
