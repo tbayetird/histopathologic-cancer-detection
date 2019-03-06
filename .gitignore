@@ -1,0 +1,15 @@
+Notebook.ipynb
+dataset/
+mock-data/
+./dataset/
+./mock-data/
+.DS_Store
+./**/.DS_Store
+./*/.DS_Store
+*/.DS_Store
+**/.DS_Store
+*.pyc
+./**/*.pyc
+./*/*.pyc
+.ipynb_checkpoints/
+./.ipynb_checkpoints/

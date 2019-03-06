@@ -1,17 +1,10 @@
+from config import config
+from imutils import paths
 import os
-import keras
-import pandas as pd
-import numpy as np
 import utils.create_models
-from glob import glob
+from keras.preprocessing.image import ImageDataGenerator
 
-from keras.preprocessing.image import load_img, img_to_array
-
-
-file_loc = os.path.realpath(__file__)
-local_dir = os.path.dirname(file_loc)
-mock_data_dir = os.path.join(local_dir,'mock-data')
-model_path='' # no model to load yet
+batch_size = 32
 
 # Set the image size.
 img_height = 96
@@ -21,12 +14,39 @@ img_width = 96
 # LOADING MODEL
 ###############################
 
-model = utils.create_models.create_mlp((96,96,3))
+model = utils.create_models.create_mlp((img_width,img_height,3))
 model.summary()
 
 ################################
 # LOADING AND PREPROCESSING THE DATA
 ###############################
+
+train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x,
+                                   rescale=1./255,
+                                   width_shift_range=4,
+                                   height_shift_range=4,
+                                   rotation_range=90,
+                                   zoom_range=0.2,
+                                   horizontal_flip=True,
+                                   vertical_flip=True)
+
+test_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x, rescale=1./255)
+
+train_generator = train_datagen.flow_from_directory(
+    config.TRAIN_PATH,
+    class_mode="categorical",
+    target_size=(img_width, img_height),
+    color_mode="rgb",
+    shuffle=True,
+    batch_size=batch_size)
+
+valid_generator = test_datagen.flow_from_directory(
+    config.VAL_PATH,
+    class_mode="categorical",
+    target_size=(img_width, img_height),
+    color_mode="rgb",
+    shuffle=False,
+    batch_size=batch_size)
 
 
 ################################
