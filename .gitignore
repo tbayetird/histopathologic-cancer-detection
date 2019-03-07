@@ -1,8 +1,6 @@
 Notebook.ipynb
 dataset/
-mock-data/
 ./dataset/
-./mock-data/
 .DS_Store
 ./**/.DS_Store
 ./*/.DS_Store
@@ -13,3 +11,5 @@ mock-data/
 ./*/*.pyc
 .ipynb_checkpoints/
 ./.ipynb_checkpoints/
+new_dataset/
+./new_dataset/
