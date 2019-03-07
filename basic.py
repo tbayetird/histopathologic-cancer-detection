@@ -12,11 +12,13 @@ from utils import create_models as cm
 ################################
 # SETTING UP DATASET
 ###############################
+#
+# shouldSetup = False
+# if (shouldSetup):
+#     print("[INFO] Setting up dataset")
+#     utils.setup_dataset.setup()
+## Previous way of working with datasets, should be deleted
 
-shouldSetup = False
-if (shouldSetup):
-    print("[INFO] Setting up dataset")
-    utils.setup_dataset.setup()
 
 batch_size = 16
 
