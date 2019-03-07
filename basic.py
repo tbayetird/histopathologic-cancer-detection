@@ -1,10 +1,13 @@
+#%%
 from config import config
 from imutils import paths
 import os
-import utils.create_models
 import utils.setup_dataset
 from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
+from keras import backend as backend
+import imp
+from utils import create_models as cm
 
 ################################
 # SETTING UP DATASET
@@ -12,6 +15,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 shouldSetup = False
 if (shouldSetup):
+    print("[INFO] Setting up dataset")
     utils.setup_dataset.setup()
 
 batch_size = 16
@@ -21,15 +25,11 @@ img_height = 96
 img_width = 96
 
 ################################
-# LOADING MODEL
-###############################
-
-model = utils.create_models.create_mlp((img_width,img_height,3),True)
-model.summary()
-
+# LOADING AND PREPROCESSING DATA
 ################################
-# LOADING AND PREPROCESSING THE DATA
-###############################
+
+print("[INFO] Loading and preprocessing data")
+print("[INFO] Testing on '{}' data".format(len(os.listdir(config.TEST_PATH))))
 
 train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x,
                                    rescale=1./255,
@@ -42,6 +42,7 @@ train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()
 
 test_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x, rescale=1./255)
 
+print("[INFO] Loading and preprocessing training data")
 train_generator = train_datagen.flow_from_directory(
     config.TRAIN_PATH,
     class_mode="binary",
@@ -50,8 +51,7 @@ train_generator = train_datagen.flow_from_directory(
     shuffle=True,
     batch_size=batch_size)
 
-print(config.TRAIN_PATH)
-
+print("[INFO] Loading and preprocessing validation data")
 valid_generator = test_datagen.flow_from_directory(
     config.VAL_PATH,
     class_mode="binary",
@@ -60,10 +60,24 @@ valid_generator = test_datagen.flow_from_directory(
     shuffle=False,
     batch_size=batch_size)
 
+#%%
+################################
+# LOADING MODEL
+################################
 
+print("[INFO] Loading model")
+
+imp.reload(utils.create_models)
+backend.clear_session()
+model = cm.create_mlp((img_width,img_height,3),True)
+model.summary()
+
+#%%
 ################################
 # TRAINING MODEL
-###############################
+################################
+
+print("[INFO] Training model")
 
 model.compile(loss='binary_crossentropy',
             optimizer=optimizers.RMSprop(lr=1e-5),
