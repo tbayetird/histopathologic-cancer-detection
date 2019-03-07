@@ -15,6 +15,7 @@ from utils import create_models as cm
 
 shouldSetup = False
 if (shouldSetup):
+    print("[INFO] Setting up dataset")
     utils.setup_dataset.setup()
 
 batch_size = 16
@@ -24,8 +25,11 @@ img_height = 96
 img_width = 96
 
 ################################
-# LOADING AND PREPROCESSING THE DATA
+# LOADING AND PREPROCESSING DATA
 ################################
+
+print("[INFO] Loading and preprocessing data")
+print("[INFO] Testing on '{}' data".format(len(os.listdir(config.TEST_PATH))))
 
 train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x,
                                    rescale=1./255,
@@ -38,6 +42,7 @@ train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()
 
 test_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x, rescale=1./255)
 
+print("[INFO] Loading and preprocessing training data")
 train_generator = train_datagen.flow_from_directory(
     config.TRAIN_PATH,
     class_mode="binary",
@@ -46,6 +51,7 @@ train_generator = train_datagen.flow_from_directory(
     shuffle=True,
     batch_size=batch_size)
 
+print("[INFO] Loading and preprocessing validation data")
 valid_generator = test_datagen.flow_from_directory(
     config.VAL_PATH,
     class_mode="binary",
@@ -59,6 +65,8 @@ valid_generator = test_datagen.flow_from_directory(
 # LOADING MODEL
 ################################
 
+print("[INFO] Loading model")
+
 imp.reload(utils.create_models)
 backend.clear_session()
 model = cm.create_mlp((img_width,img_height,3),True)
@@ -68,6 +76,8 @@ model.summary()
 ################################
 # TRAINING MODEL
 ################################
+
+print("[INFO] Training model")
 
 model.compile(loss='binary_crossentropy',
             optimizer=optimizers.RMSprop(lr=1e-5),
