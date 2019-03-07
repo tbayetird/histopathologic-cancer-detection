@@ -1,0 +1,4 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.pythonPath": "/Users/ahmad/.virtualenvs/lab/bin/python"
+}

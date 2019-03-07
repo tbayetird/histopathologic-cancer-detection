@@ -1,10 +1,13 @@
+#%%
 from config import config
 from imutils import paths
 import os
-import utils.create_models
 import utils.setup_dataset
 from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
+from keras import backend as backend
+import imp
+from utils import create_models as cm
 
 ################################
 # SETTING UP DATASET
@@ -21,15 +24,8 @@ img_height = 96
 img_width = 96
 
 ################################
-# LOADING MODEL
-###############################
-
-model = utils.create_models.create_mlp((img_width,img_height,3),True)
-model.summary()
-
-################################
 # LOADING AND PREPROCESSING THE DATA
-###############################
+################################
 
 train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x,
                                    rescale=1./255,
@@ -50,8 +46,6 @@ train_generator = train_datagen.flow_from_directory(
     shuffle=True,
     batch_size=batch_size)
 
-print(config.TRAIN_PATH)
-
 valid_generator = test_datagen.flow_from_directory(
     config.VAL_PATH,
     class_mode="binary",
@@ -60,10 +54,20 @@ valid_generator = test_datagen.flow_from_directory(
     shuffle=False,
     batch_size=batch_size)
 
+#%%
+################################
+# LOADING MODEL
+################################
 
+imp.reload(utils.create_models)
+backend.clear_session()
+model = cm.create_mlp((img_width,img_height,3),True)
+model.summary()
+
+#%%
 ################################
 # TRAINING MODEL
-###############################
+################################
 
 model.compile(loss='binary_crossentropy',
             optimizer=optimizers.RMSprop(lr=1e-5),

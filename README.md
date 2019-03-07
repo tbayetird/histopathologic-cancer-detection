@@ -68,7 +68,7 @@ Les soumissions sont évaluées sur <a href="https://en.wikipedia.org/wiki/Recei
     <li>Le projet et tableau Kanbaan sera de même stocké sur Github</li>
 </ul>
 
-### 1. Architecture technique
+### 2. Architecture technique
 
 L'implémentation de notre model se fera sur la base du framework DeepLearning Keras.
 Le projet sera structuré ainsi:
