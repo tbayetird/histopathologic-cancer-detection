@@ -8,6 +8,13 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as backend
 import imp
 from utils import create_models as cm
+import gc
+from glob import glob
+import pandas as pd
+import shutil
+from skimage.io import imread
+import numpy as np
+from time import gmtime, strftime
 
 ################################
 # SETTING UP DATASET
@@ -18,7 +25,8 @@ if (shouldSetup):
     print("[INFO] Setting up dataset")
     utils.setup_dataset.setup()
 
-batch_size = 16
+batch_size = 100
+testing_batch_size = 5000
 
 # Set the image size.
 img_height = 96
@@ -97,10 +105,36 @@ history = model.fit_generator(
 
 # Nothing yet
 
-
+#%%
 ################################
 # PREDICTING ON TEST SET
 ###############################
 
+print("[INFO] Predicting and generating submission file")
 
-#Nothing yet
+testingDataset = glob(os.path.join(config.TEST_PATH,'*.tif'))
+submissionDataframe = pd.DataFrame()
+testingDatasetSize = len(testingDataset)
+print("[INFO] Predicting on '{}' data".format(testingDatasetSize))
+
+for index in range(0, testingDatasetSize, testing_batch_size):
+    print("[INFO] Predicting on batch: %i - %i"%(index, index+testing_batch_size))
+    df = pd.DataFrame({'path': testingDataset[index:index+testing_batch_size]})
+    df['id'] = df.path.map(lambda x: os.path.basename(x).split(".")[0])
+    df['image'] = df['path'].map(imread)
+    stack = np.stack(df['image'].values)
+    stack = (stack - stack.mean()) / stack.std()
+    predictions = model.predict(stack)
+    df['label'] = predictions
+    submissionDataframe = pd.concat([submissionDataframe, df[['id', 'label']]])
+
+print("[INFO] Generating submission file")
+
+imp.reload(config)
+submissionFilePath = os.path.sep.join([config.SUBMITION_FILE_PATH, ("submission__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime()) + ".csv")])
+submissionDataframe.to_csv(submissionFilePath, index = False, header = True)
+
+#clearing ram, make some free space
+gc.collect()
+
+print("[INFO] Done")
