@@ -6,7 +6,7 @@ import shutil
 import os
 from sklearn.model_selection import train_test_split
 
-def setup():
+def initialSetup():
     dataframe = pd.read_csv(config.LABELS_PATH)
     i = int(len(dataframe) * config.VAL_SPLIT)
 

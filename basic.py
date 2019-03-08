@@ -1,4 +1,3 @@
-#%%
 from config import config
 from imutils import paths
 import os
@@ -28,8 +27,8 @@ import matplotlib.pyplot as plt
 ## Previous way of working with datasets, should be deleted
 
 
-batch_size = 100
-testing_batch_size = 5000
+batch_size = 64
+testing_batch_size = 64
 
 # Set the image size.
 img_height = 96
@@ -63,7 +62,7 @@ train_generator = train_datagen.flow_from_directory(
     batch_size=batch_size)
 
 print("[INFO] Loading and preprocessing validation data")
-valid_generator = test_datagen.flow_from_directory(
+validation_generator = test_datagen.flow_from_directory(
     config.VAL_PATH,
     class_mode="binary",
     target_size=(img_width, img_height),
@@ -71,7 +70,6 @@ valid_generator = test_datagen.flow_from_directory(
     shuffle=False,
     batch_size=batch_size)
 
-#%%
 ################################
 # LOADING MODEL
 ################################
@@ -83,7 +81,6 @@ backend.clear_session()
 model = cm.create_mlp((img_width,img_height,3),True)
 model.summary()
 
-#%%
 ################################
 # TRAINING MODEL
 ################################
@@ -94,13 +91,24 @@ model.compile(loss='binary_crossentropy',
             optimizer=optimizers.RMSprop(lr=1e-5),
             metrics=['acc'])
 
+STEP_SIZE_TRAIN = train_generator.n//train_generator.batch_size
+STEP_SIZE_VALIDDATION = validation_generator.n//validation_generator.batch_size
+
 history = model.fit_generator(
         train_generator,
-        steps_per_epoch=3,
-        epochs=10,
-        validation_data=valid_generator,
-        validation_steps=3)
+        steps_per_epoch=STEP_SIZE_TRAIN,
+        epochs=15,
+        validation_data=validation_generator,
+        validation_steps=STEP_SIZE_VALIDDATION)
 
+################################
+# EVLUATING MODEL
+################################
+
+print("[INFO] Evluating model on validation data")
+
+validation_loss, validation_acc = model.evaluate_generator(validation_generator, steps=50)
+print("[RESULT] VALIDATION LOSS : '{0}', \n\t VALIDATION ACCURACY : '{1}'".format(validation_loss, validation_acc))
 
 ################################
 # TRAINING VISUALS
