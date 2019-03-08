@@ -10,6 +10,6 @@ VAL_PATH = os.path.sep.join([BASE_PATH, "validation"])
 TEST_PATH = os.path.sep.join([BASE_PATH, "test"])
 LABELS_PATH = os.path.sep.join([BASE_PATH, "train_labels.csv"])
 SUBMITION_FILE_PATH = BASE_PATH
-DATASET_SIZE = 1000
+DATASET_SIZE = 220025
 VAL_SPLIT = 0.2
 MODEL_PATH='' # no model to load yet
