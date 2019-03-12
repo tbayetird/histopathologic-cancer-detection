@@ -10,7 +10,7 @@ from config import config
 from utils import create_models as cm
 
 batch_size = 32
-epochs = 1
+epochs = 40
 
 save_model = True
 
