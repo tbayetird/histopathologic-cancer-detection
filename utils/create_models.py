@@ -3,23 +3,57 @@ from keras.models import Sequential
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
+from keras.layers.convolutional import SeparableConv2D
 from keras.layers.core import Activation
 from keras.layers.core import Dropout
 from keras.layers.core import Dense
 from keras.layers import Flatten
 from keras.layers import Input
 from keras.models import Model
+from keras import backend as K
 
-def create_mlp(shape, regress=False):
+def create_mlp(shape, classes):
+
 	# define our MLP network
-	model = Sequential()
-	model.add(Dense(8, input_shape=shape, activation="relu"))
-	model.add(Dense(4, activation="relu"))
 
-	# check to see if the regression node should be added
-	if regress:
-		model.add(Flatten())
-		model.add(Dense(1, activation="sigmoid"))
+	model = Sequential()
+	channelDimension = -1
+
+	model.add(SeparableConv2D(32, (3, 3), padding="same", input_shape=shape))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization(axis=channelDimension))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.25))
+
+	model.add(SeparableConv2D(64, (3, 3), padding="same"))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization(axis=channelDimension))
+	model.add(SeparableConv2D(64, (3, 3), padding="same"))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization(axis=channelDimension))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.25))
+
+	model.add(SeparableConv2D(128, (3, 3), padding="same"))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization(axis=channelDimension))
+	model.add(SeparableConv2D(128, (3, 3), padding="same"))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization(axis=channelDimension))
+	model.add(SeparableConv2D(128, (3, 3), padding="same"))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization(axis=channelDimension))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.25))
+
+	model.add(Flatten())
+	model.add(Dense(256))
+	model.add(Activation("relu"))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.5))
+
+	model.add(Dense(2))
+	model.add(Activation("softmax"))
 
 	# return our model
 	return model

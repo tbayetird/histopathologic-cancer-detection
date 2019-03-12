@@ -15,6 +15,7 @@ from skimage.io import imread
 import numpy as np
 from time import gmtime, strftime
 import matplotlib.pyplot as plt
+from keras.optimizers import Adagrad
 
 ################################
 # SETTING UP DATASET
@@ -27,8 +28,9 @@ import matplotlib.pyplot as plt
 ## Previous way of working with datasets, should be deleted
 
 
-batch_size = 64
-testing_batch_size = 64
+batch_size = 32
+testing_batch_size = 32
+epochs = 40
 
 # Set the image size.
 img_height = 96
@@ -55,7 +57,7 @@ test_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean())
 print("[INFO] Loading and preprocessing training data")
 train_generator = train_datagen.flow_from_directory(
     config.TRAIN_PATH,
-    class_mode="binary",
+    class_mode="categorical",
     target_size=(img_width, img_height),
     color_mode="rgb",
     shuffle=True,
@@ -64,7 +66,16 @@ train_generator = train_datagen.flow_from_directory(
 print("[INFO] Loading and preprocessing validation data")
 validation_generator = test_datagen.flow_from_directory(
     config.VAL_PATH,
-    class_mode="binary",
+    class_mode="categorical",
+    target_size=(img_width, img_height),
+    color_mode="rgb",
+    shuffle=False,
+    batch_size=batch_size)
+
+print("[INFO] Loading and preprocessing test data")
+testing_generator = test_datagen.flow_from_directory(
+    config.TEST_PATH,
+    class_mode=None,
     target_size=(img_width, img_height),
     color_mode="rgb",
     shuffle=False,
@@ -78,7 +89,7 @@ print("[INFO] Loading model")
 
 imp.reload(utils.create_models)
 backend.clear_session()
-model = cm.create_mlp((img_width,img_height,3),True)
+model = cm.create_mlp((img_height,img_width,3),2)
 model.summary()
 
 ################################
@@ -86,10 +97,10 @@ model.summary()
 ################################
 
 print("[INFO] Training model")
-
+opt = Adagrad(lr=1e-2, decay=1e-2 / epochs)
 model.compile(loss='binary_crossentropy',
-            optimizer=optimizers.RMSprop(lr=1e-5),
-            metrics=['acc'])
+            optimizer=opt,
+            metrics=['accuracy'])
 
 STEP_SIZE_TRAIN = train_generator.n//train_generator.batch_size
 STEP_SIZE_VALIDDATION = validation_generator.n//validation_generator.batch_size
@@ -97,7 +108,7 @@ STEP_SIZE_VALIDDATION = validation_generator.n//validation_generator.batch_size
 history = model.fit_generator(
         train_generator,
         steps_per_epoch=STEP_SIZE_TRAIN,
-        epochs=15,
+        epochs=epochs,
         validation_data=validation_generator,
         validation_steps=STEP_SIZE_VALIDDATION)
 
@@ -105,10 +116,11 @@ history = model.fit_generator(
 # EVLUATING MODEL
 ################################
 
-print("[INFO] Evluating model on validation data")
+print("[INFO] Evluating model on testing data")
 
-validation_loss, validation_acc = model.evaluate_generator(validation_generator, steps=50)
-print("[RESULT] VALIDATION LOSS : '{0}', \n\t VALIDATION ACCURACY : '{1}'".format(validation_loss, validation_acc))
+STEP_SIZE_TESTING = testing_generator.n//testing_generator.batch_size
+t_loss, t_acc = model.evaluate_generator(testing_generator, steps=STEP_SIZE_TESTING)
+print("[RESULT] LOSS : '{0}', \n\t ACCURACY : '{1}'".format(t_loss, t_acc))
 
 ################################
 # TRAINING VISUALS
@@ -119,17 +131,17 @@ val_acc = history.history['val_acc']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-epochs = range(1, len(acc) +1)
+epcs = range(1, len(acc) +1)
 
-plt.plot(epochs,acc,'bo',label='Training acc')
-plt.plot(epochs,val_acc,'b',label='Validation acc')
+plt.plot(epcs,acc,'bo',label='Training acc')
+plt.plot(epcs,val_acc,'b',label='Validation acc')
 plt.title('Training and validation accuracy')
 plt.legend()
 
 plt.figure()
 
-plt.plot(epochs,loss,'bo',label='Training loss')
-plt.plot(epochs,val_loss,'b',label='Validation loss')
+plt.plot(epcs,loss,'bo',label='Training loss')
+plt.plot(epcs,val_loss,'b',label='Validation loss')
 plt.title('Training and validation loss')
 plt.legend()
 
