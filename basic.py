@@ -75,7 +75,7 @@ validation_generator = test_datagen.flow_from_directory(
 print("[INFO] Loading and preprocessing test data")
 testing_generator = test_datagen.flow_from_directory(
     config.TEST_PATH,
-    class_mode=None,
+    class_mode="categorical",
     target_size=(img_width, img_height),
     color_mode="rgb",
     shuffle=False,
