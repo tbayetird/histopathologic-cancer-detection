@@ -8,17 +8,17 @@ from setup_dataset import setup_train_and_validation, setup_test
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--input_path", type=str, required=False, default='dataset',
-	help="path to input dataset")
+                help="path to input dataset")
 ap.add_argument("-o", "--output_path", type=str, required=False, default='.',
-	help="path to the output dataset")
+                help="path to the output dataset")
 ap.add_argument("-csv", "--csv", type=str,required=False, default='train_labels.csv',
-    help="name of the csv containing informations on the dataset")
+                help="name of the csv containing informations on the dataset")
 ap.add_argument("-n", "--name", type=str, required=False, default='new_dataset',
-	help="name of the directory that will be created and filled with the data")
+                help="name of the directory that will be created and filled with the data")
 ap.add_argument("-trs", '--train_size', type=int, required=True,
-    help ="size of the training dataset")
+                help ="size of the training dataset")
 ap.add_argument("-tes", '--test_size', type=int, required=True,
-    help ="size of the test dataset")
+                help ="size of the test dataset")
 args = vars(ap.parse_args())
 
 
@@ -44,26 +44,26 @@ df_test_trunc.to_csv(os.path.join(new_dataset,'test_labels.csv'))
 
 for i in train_files:
     sh.copyfile(os.path.join(ids_path,'train',i+'.tif'),
-            os.path.join(new_dataset,'train',i+'.tif'))
+                os.path.join(new_dataset,'train',i+'.tif'))
 
 for i in test_files:
     sh.copyfile(os.path.join(ids_path,'train',i+'.tif'),
-            os.path.join(new_dataset,'test',i+'.tif'))
+                os.path.join(new_dataset,'test',i+'.tif'))
 
 
 ### Restructuring the set trhough setup_dataset :
 csv_train_path = os.path.join(new_dataset,'train_labels.csv')
 csv_test_path = os.path.join(new_dataset,'test_labels.csv')
 setup_train_and_validation(
-		csv_train_path,
-        args["train_size"],
-        os.path.sep.join([new_dataset,'train']),
-        os.path.sep.join([new_dataset,'validation']),
-        os.path.join(new_dataset,'train')
-        )
+    csv_train_path,
+    args["train_size"],
+    os.path.sep.join([new_dataset,'train']),
+    os.path.sep.join([new_dataset,'validation']),
+    os.path.join(new_dataset,'train')
+)
 
 setup_test(csv_test_path,
-			args["test_size"],
-			os.path.sep.join([new_dataset,'test']),
-			os.path.join(new_dataset,'test')
-			)
+           args["test_size"],
+           os.path.sep.join([new_dataset,'test']),
+           os.path.join(new_dataset,'test')
+           )

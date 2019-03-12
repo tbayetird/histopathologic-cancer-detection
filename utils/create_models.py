@@ -1,16 +1,13 @@
 # import the necessary packages
-from keras.models import Sequential
-from keras.layers.normalization import BatchNormalization
-from keras.layers.convolutional import Conv2D
+from keras.layers import Flatten
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.convolutional import SeparableConv2D
 from keras.layers.core import Activation
-from keras.layers.core import Dropout
 from keras.layers.core import Dense
-from keras.layers import Flatten
-from keras.layers import Input
-from keras.models import Model
-from keras import backend as K
+from keras.layers.core import Dropout
+from keras.layers.normalization import BatchNormalization
+from keras.models import Sequential
+
 
 def create_mlp(shape, classes):
 
@@ -52,8 +49,9 @@ def create_mlp(shape, classes):
 	model.add(BatchNormalization())
 	model.add(Dropout(0.5))
 
-	model.add(Dense(2))
+	model.add(Dense(classes))
 	model.add(Activation("softmax"))
+
 
 	# return our model
 	return model

@@ -1,36 +1,18 @@
-from config import config
-from imutils import paths
-import os
-import utils.setup_dataset
-from keras import optimizers
-from keras.preprocessing.image import ImageDataGenerator
-from keras import backend as backend
-import imp
-from utils import create_models as cm
 import gc
-from glob import glob
-import pandas as pd
-import shutil
-from skimage.io import imread
-import numpy as np
+import os
 from time import gmtime, strftime
+
 import matplotlib.pyplot as plt
 from keras.optimizers import Adagrad
+from keras.preprocessing.image import ImageDataGenerator
 
-################################
-# SETTING UP DATASET
-###############################
-#
-# shouldSetup = False
-# if (shouldSetup):
-#     print("[INFO] Setting up dataset")
-#     utils.setup_dataset.setup()
-## Previous way of working with datasets, should be deleted
-
+from config import config
+from utils import create_models as cm
 
 batch_size = 32
-testing_batch_size = 32
-epochs = 40
+epochs = 1
+
+save_model = True
 
 # Set the image size.
 img_height = 96
@@ -87,8 +69,6 @@ testing_generator = test_datagen.flow_from_directory(
 
 print("[INFO] Loading model")
 
-imp.reload(utils.create_models)
-backend.clear_session()
 model = cm.create_mlp((img_height,img_width,3),2)
 model.summary()
 
@@ -99,21 +79,35 @@ model.summary()
 print("[INFO] Training model")
 opt = Adagrad(lr=1e-2, decay=1e-2 / epochs)
 model.compile(loss='binary_crossentropy',
-            optimizer=opt,
-            metrics=['accuracy'])
+              optimizer=opt,
+              metrics=['accuracy'])
 
 STEP_SIZE_TRAIN = train_generator.n//train_generator.batch_size
 STEP_SIZE_VALIDDATION = validation_generator.n//validation_generator.batch_size
 
 history = model.fit_generator(
-        train_generator,
-        steps_per_epoch=STEP_SIZE_TRAIN,
-        epochs=epochs,
-        validation_data=validation_generator,
-        validation_steps=STEP_SIZE_VALIDDATION)
+    train_generator,
+    steps_per_epoch=STEP_SIZE_TRAIN,
+    epochs=epochs,
+    validation_data=validation_generator,
+    validation_steps=STEP_SIZE_VALIDDATION)
 
 ################################
-# EVLUATING MODEL
+# SAVING MODEL
+################################
+
+if (save_model):
+    print("[INFO] Saving model")
+    model_name = "model__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime())
+    model_json = model.to_json()
+    with open(config.MODELS_PATH + "/" + model_name + ".json", "w") as json_file:
+        json_file.write(model_json)
+    model.save_weights(config.MODELS_PATH + "/" + model_name + ".h5")
+    print("[INFO] Saved model '{}' to disk".format(model_name))
+
+
+################################
+# EVALUATING MODEL
 ################################
 
 print("[INFO] Evluating model on testing data")
@@ -146,36 +140,6 @@ plt.title('Training and validation loss')
 plt.legend()
 
 plt.show()
-
-
-#%%
-################################
-# PREDICTING ON TEST SET
-###############################
-
-print("[INFO] Predicting and generating submission file")
-
-testingDataset = glob(os.path.join(config.TEST_PATH,'*.tif'))
-submissionDataframe = pd.DataFrame()
-testingDatasetSize = len(testingDataset)
-print("[INFO] Predicting on '{}' data".format(testingDatasetSize))
-
-for index in range(0, testingDatasetSize, testing_batch_size):
-    print("[INFO] Predicting on batch: %i - %i"%(index, index+testing_batch_size))
-    df = pd.DataFrame({'path': testingDataset[index:index+testing_batch_size]})
-    df['id'] = df.path.map(lambda x: os.path.basename(x).split(".")[0])
-    df['image'] = df['path'].map(imread)
-    stack = np.stack(df['image'].values)
-    stack = (stack - stack.mean()) / stack.std()
-    predictions = model.predict(stack)
-    df['label'] = predictions
-    submissionDataframe = pd.concat([submissionDataframe, df[['id', 'label']]])
-
-print("[INFO] Generating submission file")
-
-imp.reload(config)
-submissionFilePath = os.path.sep.join([config.SUBMITION_FILE_PATH, ("submission__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime()) + ".csv")])
-submissionDataframe.to_csv(submissionFilePath, index = False, header = True)
 
 #clearing ram, make some free space
 gc.collect()
