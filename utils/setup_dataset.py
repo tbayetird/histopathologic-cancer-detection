@@ -46,12 +46,13 @@ def initialSetup():
     print("[INFO] all done, good to go")
 
 
-def setup(csv_path,dataset_size,train_path,val_path,train_dir):
+def setup_train_and_validation(csv_path,dataset_size,train_path,val_path,train_dir):
     dataframe = pd.read_csv(csv_path)
     i = int(len(dataframe) * config.VAL_SPLIT)
-
+    # i = int(len(dataframe) * 0.2)
     dataframeSubset = dataframe.sample(n=dataset_size, random_state=2018)
     trainingSet, validationSet = train_test_split(dataframeSubset,test_size=config.VAL_SPLIT)
+    # trainingSet, validationSet = train_test_split(dataframeSubset,test_size=0.2)
 
 
     trainDatasets = [
@@ -78,6 +79,40 @@ def setup(csv_path,dataset_size,train_path,val_path,train_dir):
                 os.makedirs(labelPath)
 
             originalFilePath = os.path.sep.join([train_dir, filename])
+            filePath = os.path.sep.join([labelPath, filename])
+            shutil.move(originalFilePath, filePath)
+
+        print("[INFO] done building '{}' split".format(dType))
+
+    print("[INFO] all done, good to go")
+
+def setup_test(csv_path,dataset_size,test_path,test_dir):
+    dataframe = pd.read_csv(csv_path)
+
+    dataframeSubset = dataframe.sample(n=dataset_size, random_state=2018)
+    testDatasets = [
+        ("test", dataframeSubset,test_path)
+    ]
+
+    print("[INFO] working on '{}' data".format(dataset_size))
+
+    for (dType, dataset, baseOutput) in testDatasets:
+        print("[INFO] building '{}' split".format(dType))
+
+        if not os.path.exists(baseOutput):
+            print("[INFO] 'creating {}' directory".format(baseOutput))
+            os.makedirs(baseOutput)
+
+        for (index, row) in dataset.iterrows():
+            label = row['label']
+            filename = row['id'] + ".tif"
+            labelPath = os.path.sep.join([baseOutput, str(label)])
+
+            if not os.path.exists(labelPath):
+                print("[INFO] 'creating {}' directory".format(labelPath))
+                os.makedirs(labelPath)
+
+            originalFilePath = os.path.sep.join([test_dir, filename])
             filePath = os.path.sep.join([labelPath, filename])
             shutil.move(originalFilePath, filePath)
 
