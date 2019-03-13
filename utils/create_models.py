@@ -50,7 +50,7 @@ def create_mlp(shape, classes):
 	model.add(Dropout(0.5))
 
 	model.add(Dense(classes))
-	model.add(Activation("softmax"))
+	model.add(Activation("sigmoid"))
 
 
 	# return our model

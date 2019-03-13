@@ -34,7 +34,7 @@ submissionDataframe = pd.DataFrame()
 testingDatasetSize = len(testingDataset)
 print("[INFO] Predicting on '{}' data".format(testingDatasetSize))
 
-testing_batch_size = 32
+testing_batch_size = 5000
 for index in range(0, testingDatasetSize, testing_batch_size):
     print("[INFO] Predicting on batch: %i - %i"%(index, index+testing_batch_size))
     df = pd.DataFrame({'path': testingDataset[index:index+testing_batch_size]})
@@ -42,16 +42,14 @@ for index in range(0, testingDatasetSize, testing_batch_size):
     df['image'] = df['path'].map(imread)
     stack = np.stack(df['image'].values)
     stack = keras.applications.inception_resnet_v2.preprocess_input(stack)
-    predictions = loaded_model.predict(stack)
-    print(predictions[4])
-    exit(0)
+    predictions = loaded_model.predict_classes(stack)
     df['label'] = predictions
-    #submissionDataframe = pd.concat([submissionDataframe, df[['id', 'label']]])
+    submissionDataframe = pd.concat([submissionDataframe, df[['id', 'label']]])
 
 print("[INFO] Generating submission file")
 
-#submissionFilePath = os.path.sep.join([config.SUBMITION_FILE_PATH, ("submission__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime()) + ".csv")])
-#submissionDataframe.to_csv(submissionFilePath, index = False, header = True)
+submissionFilePath = os.path.sep.join([config.SUBMITION_FILE_PATH, ("submission__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime()) + ".csv")])
+submissionDataframe.to_csv(submissionFilePath, index = False, header = True)
 
 #clearing ram, make some free space
 gc.collect()
