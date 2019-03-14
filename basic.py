@@ -6,7 +6,7 @@ from time import gmtime, strftime
 import keras
 import matplotlib.pyplot as plt
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
-from keras.optimizers import Adam
+from keras.optimizers import SGD
 from keras.preprocessing.image import ImageDataGenerator
 
 from config import config
@@ -83,7 +83,7 @@ model.summary()
 ################################
 
 print("[INFO] Training model")
-opt = Adam(lr=2e-4)
+opt = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='binary_crossentropy',
               optimizer=opt,
               metrics=['accuracy'])
