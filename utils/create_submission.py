@@ -40,9 +40,8 @@ for index in range(0, testingDatasetSize, testing_batch_size):
     df = pd.DataFrame({'path': testingDataset[index:index+testing_batch_size]})
     df['id'] = df.path.map(lambda x: os.path.basename(x).split(".")[0])
     df['image'] = df['path'].map(imread)
-    stack = np.stack(df['image'].values)
-    stack = keras.applications.inception_resnet_v2.preprocess_input(stack)
-    predictions = loaded_model.predict(stack)
+    stack = np.stack(df.image, axis=0)
+    predictions = [loaded_model.predict(np.expand_dims(item / 255.0, axis=0))[0][0] for item in stack]
     df['label'] = predictions
     submissionDataframe = pd.concat([submissionDataframe, df[['id', 'label']]])
 
