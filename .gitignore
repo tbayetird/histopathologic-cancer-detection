@@ -13,3 +13,5 @@ dataset/
 ./.ipynb_checkpoints/
 new_dataset/
 ./new_dataset/
+.idea/
+./.idea/

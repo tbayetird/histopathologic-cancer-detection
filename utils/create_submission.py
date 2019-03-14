@@ -34,7 +34,7 @@ submissionDataframe = pd.DataFrame()
 testingDatasetSize = len(testingDataset)
 print("[INFO] Predicting on '{}' data".format(testingDatasetSize))
 
-testing_batch_size = 5000
+testing_batch_size = 32
 for index in range(0, testingDatasetSize, testing_batch_size):
     print("[INFO] Predicting on batch: %i - %i"%(index, index+testing_batch_size))
     df = pd.DataFrame({'path': testingDataset[index:index+testing_batch_size]})
@@ -42,7 +42,7 @@ for index in range(0, testingDatasetSize, testing_batch_size):
     df['image'] = df['path'].map(imread)
     stack = np.stack(df['image'].values)
     stack = keras.applications.inception_resnet_v2.preprocess_input(stack)
-    predictions = loaded_model.predict_classes(stack)
+    predictions = loaded_model.predict(stack)
     df['label'] = predictions
     submissionDataframe = pd.concat([submissionDataframe, df[['id', 'label']]])
 

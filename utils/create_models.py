@@ -9,7 +9,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
 
 
-def create_mlp(shape, classes):
+def create_mlp(shape):
 
 	# define our MLP network
 
@@ -49,9 +49,7 @@ def create_mlp(shape, classes):
 	model.add(BatchNormalization())
 	model.add(Dropout(0.5))
 
-	model.add(Dense(classes))
-	model.add(Activation("sigmoid"))
-
+	model.add(Dense(1, activation="sigmoid"))
 
 	# return our model
 	return model
