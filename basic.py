@@ -1,9 +1,7 @@
 import gc
-import gc
 import os
 from time import gmtime, strftime
 
-import keras
 import matplotlib.pyplot as plt
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
 from keras.optimizers import SGD
@@ -28,19 +26,23 @@ img_width = 96
 print("[INFO] Loading and preprocessing data")
 print("[INFO] Testing on '{}' data".format(len(os.listdir(config.TEST_PATH))))
 
-train_datagen = ImageDataGenerator(preprocessing_function= keras.applications.resnet50.preprocess_input,
-                                   rescale=1./255,
-                                   width_shift_range=0.1,
-                                   height_shift_range=0.1,
-                                   shear_range=0.05,
-                                   channel_shift_range=0.1,
-                                   rotation_range=90,
-                                   zoom_range=0.2,
-                                   horizontal_flip=True,
-                                   vertical_flip=True,
-                                   fill_mode="nearest")
+train_datagen = ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x,
+                            horizontal_flip=True,
+                            vertical_flip=True)
 
-test_datagen = ImageDataGenerator(rescale=1./255)
+    # ImageDataGenerator(preprocessing_function=lambda x:(x - x.mean()) / x.std() if x.std() > 0 else x,
+    #                                rescale=1./255,
+    #                                width_shift_range=0.1,
+    #                                height_shift_range=0.1,
+    #                                shear_range=0.05,
+    #                                channel_shift_range=0.1,
+    #                                rotation_range=90,
+    #                                zoom_range=0.2,
+    #                                horizontal_flip=True,
+    #                                vertical_flip=True,
+    #                                fill_mode="nearest")
+
+test_datagen = train_datagen #ImageDataGenerator(rescale=1./255)
 
 print("[INFO] Loading and preprocessing training data")
 train_generator = train_datagen.flow_from_directory(
