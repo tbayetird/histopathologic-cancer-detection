@@ -9,47 +9,40 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
 
 
-def create_mlp(shape):
-
-	# define our MLP network
+def create_mlp(shape, depth = 1):
 
 	model = Sequential()
+
 	channelDimension = -1
+	initialFilters = 32
+	kernelSize = (3, 3)
+	convDropout = 0.25
+	lastDropout = 0.5
+	poolSize = (2, 2)
+	k = 2
 
-	model.add(Conv2D(32, (3, 3), padding="same", input_shape=shape))
+	model.add(Conv2D(initialFilters, kernelSize, padding="same", input_shape=shape))
 	model.add(Activation("relu"))
 	model.add(BatchNormalization(axis=channelDimension))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Dropout(0.25))
+	model.add(MaxPooling2D(pool_size=poolSize))
+	model.add(Dropout(convDropout))
 
-	model.add(Conv2D(64, (3, 3), padding="same"))
-	model.add(Activation("relu"))
-	model.add(BatchNormalization(axis=channelDimension))
-	model.add(Conv2D(64, (3, 3), padding="same"))
-	model.add(Activation("relu"))
-	model.add(BatchNormalization(axis=channelDimension))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Dropout(0.25))
-
-	model.add(Conv2D(128, (3, 3), padding="same"))
-	model.add(Activation("relu"))
-	model.add(BatchNormalization(axis=channelDimension))
-	model.add(Conv2D(128, (3, 3), padding="same"))
-	model.add(Activation("relu"))
-	model.add(BatchNormalization(axis=channelDimension))
-	model.add(Conv2D(128, (3, 3), padding="same"))
-	model.add(Activation("relu"))
-	model.add(BatchNormalization(axis=channelDimension))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Dropout(0.25))
+	if depth > 1:
+		for x in range(2, depth+1):
+			filters = initialFilters * k
+			for y in range(0, x):
+				model.add(Conv2D(filters, kernelSize, padding="same"))
+				model.add(Activation("relu"))
+				model.add(BatchNormalization(axis=channelDimension))
+			model.add(MaxPooling2D(pool_size=poolSize))
+			model.add(Dropout(convDropout))
+			k *= 2
 
 	model.add(Flatten())
-	model.add(Dense(256))
+	model.add(Dense(initialFilters * k))
 	model.add(Activation("relu"))
 	model.add(BatchNormalization())
-	model.add(Dropout(0.5))
-
+	model.add(Dropout(lastDropout))
 	model.add(Dense(1, activation="sigmoid"))
 
-	# return our model
 	return model
