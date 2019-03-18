@@ -1,9 +1,7 @@
 import gc
-import gc
 import os
 from time import gmtime, strftime
 
-import keras
 import matplotlib.pyplot as plt
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
 from keras.optimizers import SGD
@@ -12,7 +10,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from config import config
 from utils import create_models as cm
 
-batch_size = 32 #10
+batch_size = 32
 epochs = 40
 
 save_model = True
@@ -28,17 +26,9 @@ img_width = 96
 print("[INFO] Loading and preprocessing data")
 print("[INFO] Testing on '{}' data".format(len(os.listdir(config.TEST_PATH))))
 
-train_datagen = ImageDataGenerator(preprocessing_function= keras.applications.resnet50.preprocess_input,
-                                   rescale=1./255,
-                                   width_shift_range=0.1,
-                                   height_shift_range=0.1,
-                                   shear_range=0.05,
-                                   channel_shift_range=0.1,
-                                   rotation_range=90,
-                                   zoom_range=0.2,
+train_datagen = ImageDataGenerator(rescale=1./255,
                                    horizontal_flip=True,
-                                   vertical_flip=True,
-                                   fill_mode="nearest")
+                                   vertical_flip=True)
 
 test_datagen = ImageDataGenerator(rescale=1./255)
 
@@ -75,7 +65,7 @@ testing_generator = test_datagen.flow_from_directory(
 
 print("[INFO] Loading model")
 
-model = cm.create_mlp((img_height,img_width,3))
+model = cm.create_mlp((img_height,img_width,3), 4)
 model.summary()
 
 ################################
@@ -83,7 +73,7 @@ model.summary()
 ################################
 
 print("[INFO] Training model")
-opt = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True)
+opt = SGD(lr=1e-2, decay=1e-2 / epochs, momentum=0.9, nesterov=True)
 model.compile(loss='binary_crossentropy',
               optimizer=opt,
               metrics=['accuracy'])
@@ -96,7 +86,7 @@ STEP_SIZE_VALIDDATION = validation_generator.n//validation_generator.batch_size
 reduceLR = ReduceLROnPlateau(monitor='val_loss', patience=2, verbose=1, factor=0.3, cooldown=1)
 earlyStop = EarlyStopping(monitor='val_loss', patience=10, verbose=1, min_delta=0.001, restore_best_weights=True)
 logFileName = strftime("%Y-%m-%d_%H-%M-%S", gmtime())
-tensorboard = TensorBoard(log_dir="logs/{}".format(logFileName), histogram_freq=0, batch_size=32, write_graph=True, write_grads=True, write_images=False,)
+tensorboard = TensorBoard(log_dir="logs/{}".format(logFileName), histogram_freq=0, batch_size=32, write_graph=True, write_grads=True, write_images=False)
 
 history = model.fit_generator(
     train_generator,

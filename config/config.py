@@ -11,6 +11,6 @@ TEST_PATH = os.path.sep.join([BASE_PATH, "test"])
 SUBMISSION_TEST_PATH = os.path.sep.join([ROOT_FOLDER, "dataset", "test"])
 LABELS_PATH = os.path.sep.join([BASE_PATH, "train_labels.csv"])
 SUBMITION_FILE_PATH = BASE_PATH
-DATASET_SIZE = 1000
+DATASET_SIZE = 10000
 VAL_SPLIT = 0.2
 MODELS_PATH = os.path.join(ROOT_FOLDER,"models")
