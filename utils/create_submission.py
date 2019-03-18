@@ -14,22 +14,35 @@ from config import config
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-n", "--model_name", type=str, required=True, help="name of model")
+ap.add_argument("-m", "--model_path", type=str, required=False,
+                default=config.MODELS_PATH,
+                help="path to the dir of the model")
+ap.add_argument("-t", "--test_path", type=str, required=False,
+                default=config.SUBMISSION_TEST_PATH,
+                help="patht to the test dir")
+ap.add_argument("-s", "--sub_path", type=str, required=False,
+                default=config.SUBMISSION_TEST_PATH,
+                help="patht to the submission dir ")
 args = vars(ap.parse_args())
 
 model_name = args['model_name']
+model_path = args['model_path']
+test_path=args['test_path']
+print(test_path)
+submission_file_path=args['sub_path']
 print("[INFO] Loading model '{}' from disk".format(model_name))
 
-json_file = open(config.MODELS_PATH + "/" + model_name + ".json", 'r')
+json_file = open(model_path + "/" + model_name + ".json", 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
-loaded_model.load_weights(config.MODELS_PATH + "/" + model_name + ".h5")
+loaded_model.load_weights(model_path + "/" + model_name + ".h5")
 
 print("[INFO] Loaded model '{}' from disk".format(model_name))
 
 print("[INFO] Predicting and generating submission file")
 
-testingDataset = glob(os.path.join(config.SUBMISSION_TEST_PATH,'*.tif'))
+testingDataset = glob(os.path.join(test_path,'*.tif'))
 submissionDataframe = pd.DataFrame()
 testingDatasetSize = len(testingDataset)
 print("[INFO] Predicting on '{}' data".format(testingDatasetSize))
@@ -47,7 +60,7 @@ for index in range(0, testingDatasetSize, testing_batch_size):
 
 print("[INFO] Generating submission file")
 
-submissionFilePath = os.path.sep.join([config.SUBMITION_FILE_PATH, ("submission__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime()) + ".csv")])
+submissionFilePath = os.path.sep.join([submission_file_path, ("submission__" + strftime("%Y-%m-%d_%H-%M-%S", gmtime()) + ".csv")])
 submissionDataframe.to_csv(submissionFilePath, index = False, header = True)
 
 #clearing ram, make some free space
