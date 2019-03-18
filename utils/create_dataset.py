@@ -1,6 +1,5 @@
 import numpy as np
 import argparse
-import cv2
 import os
 import shutil as sh
 import pandas as pd
