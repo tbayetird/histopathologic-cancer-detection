@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import os
+import cv2
 import shutil as sh
 import pandas as pd
 from setup_dataset import setup_train_and_validation, setup_test
@@ -18,6 +19,9 @@ ap.add_argument("-trs", '--train_size', type=int, required=True,
                 help ="size of the training dataset")
 ap.add_argument("-tes", '--test_size', type=int, required=True,
                 help ="size of the test dataset")
+ap.add_argument("-s", '--image_size', type=int, required=False, default=96,
+                help ="size of the images : size*size")
+
 args = vars(ap.parse_args())
 
 
@@ -40,14 +44,31 @@ os.system("mkdir {}".format(os.path.join(new_dataset,'train')))
 os.system("mkdir {}".format(os.path.join(new_dataset,'test')))
 df_train_trunc.to_csv(os.path.join(new_dataset,'train_labels.csv'))
 df_test_trunc.to_csv(os.path.join(new_dataset,'test_labels.csv'))
+size=args['image_size']
 
-for i in train_files:
-    sh.copyfile(os.path.join(ids_path,'train',i+'.tif'),
-                os.path.join(new_dataset,'train',i+'.tif'))
+def preprocess(i):
+    img=cv2.imread(i)
+    low=int(48-size/2)
+    high=int(48+size/2)
+    img2 = img[low:high,low:high,:]
+    return img2
 
-for i in test_files:
-    sh.copyfile(os.path.join(ids_path,'train',i+'.tif'),
-                os.path.join(new_dataset,'test',i+'.tif'))
+def populate(df,input_path,output_path,ext):
+    for i in df :
+        tmp = preprocess(os.path.join(input_path,i+ext))
+        cv2.imwrite(os.path.join(output_path,i+ext),tmp)
+
+populate(train_files,os.path.join(ids_path,'train'),os.path.join(new_dataset,'train'),'.tif')
+populate(test_files,os.path.join(ids_path,'train'),os.path.join(new_dataset,'test'),'.tif')
+
+#
+# for i in train_files:
+#     sh.copyfile(os.path.join(ids_path,'train',i+'.tif'),
+#                 os.path.join(new_dataset,'train',i+'.tif'))
+#
+# for i in test_files:
+#     sh.copyfile(os.path.join(ids_path,'train',i+'.tif'),
+#                 os.path.join(new_dataset,'test',i+'.tif'))
 
 
 ### Restructuring the set trhough setup_dataset :
